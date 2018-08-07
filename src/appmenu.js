@@ -1,6 +1,6 @@
 // const { app } = require('electron');
 
-export var appMenuTemplate = [
+exports.appMenuTemplate = [
   {
     label: 'File',
     submenu: [],
