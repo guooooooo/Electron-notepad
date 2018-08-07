@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, MenuItem, ipcMain } from 'electron';
 import { appMenuTemplate } from './appmenu.js';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -9,6 +9,9 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+
+// 是否可以安全退出
+let safeExit = false;
 
 const createWindow = () => {
   // Create the browser window.
@@ -60,6 +63,13 @@ const createWindow = () => {
   }));
   Menu.setApplicationMenu(menu);
 
+  mainWindow.on('closed', (e) => {
+    if (!safeExit) {
+      e.preventDefault();
+      mainWindow.webContents.send('action', 'exiting');
+    }
+  });
+
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store windows
@@ -93,3 +103,17 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+// 监听与渲染进程的通信
+ipcMain.on('reqaction', (event, arg) => {
+  switch (arg) {
+    default:
+      break;
+    case 'exit':
+      // 做点其它操作：比如记录窗口大小、位置等，下次启动时自动使用这些设置；不过因为这里（主进程）无法访问localStorage，这些数据需要使用其它的方式来保存和加载，这里就不作演示了。
+      // 这里推荐一个相关的工具类库，可以使用它在主进程中保存加载配置数据：https://github.com/sindresorhus/electron-store
+      safeExit = true;
+      app.quit(); // 退出程序
+      break;
+  }
+});

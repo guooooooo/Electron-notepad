@@ -74,7 +74,7 @@ export var appMenuTemplate = [
     submenu: [
       {
         label: 'Home Page',
-        click() { require('electron').shell.openExternal('http://www.jianshu.com/u/a7454e40399d'); },
+        click() { require('electron').shell.openExternal('https://electronjs.org/'); },
       },
     ],
   },
